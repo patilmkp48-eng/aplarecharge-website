@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AplaRecharge - सुरक्षित पेमेंट</title>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .card {
+      max-width: 420px;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    h2 { color: #38bdf8; margin: 10px 0 8px; font-size: 20px; }
+    p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="card" id="statusCard">
+    <div style="font-size: 46px;" id="statusIcon">🔒</div>
+    <h2 id="statusTitle">सुरक्षित Cashfree पेमेंट उघडत आहे...</h2>
+    <p id="statusDesc">कृपया थोडा वेळ थांबा, तुम्हाला पेमेंट पेजवर नेले जात आहे.</p>
+  </div>
+  <script>
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      const done = params.get('done');
+      const orderId = params.get('order_id') || '';
+
+      if (done === '1') {
+        document.getElementById('statusIcon').textContent = '✅';
+        document.getElementById('statusTitle').textContent = 'पेमेंट प्रक्रिया पूर्ण झाली!';
+        document.getElementById('statusDesc').textContent = 'तुमचे पेमेंट व्हेरिफाय केले जात आहे. कृपया AplaRecharge ॲप उघडा (Order: ' + orderId + ')';
+        if (orderId) {
+          fetch('https://aplarecharge-server.onrender.com/api/payment/cashfree-return?order_id=' + encodeURIComponent(orderId)).catch(function(){});
+        }
+        return;
+      }
+
+      if (sessionId && window.Cashfree) {
+        const cashfree = Cashfree({ mode: 'production' });
+        cashfree.checkout({
+          paymentSessionId: sessionId,
+          redirectTarget: '_self'
+        });
+      }
+    };
+  </script>
+</body>
+</html>
