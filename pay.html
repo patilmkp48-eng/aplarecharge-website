@@ -29,6 +29,17 @@
     }
     h2 { color: #38bdf8; margin: 10px 0 8px; font-size: 20px; }
     p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 6px 0; }
+    .btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 12px 24px;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 800;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +47,7 @@
     <div style="font-size: 46px;" id="statusIcon">🔒</div>
     <h2 id="statusTitle">सुरक्षित Cashfree पेमेंट उघडत आहे...</h2>
     <p id="statusDesc">कृपया थोडा वेळ थांबा, तुम्हाला पेमेंट पेजवर नेले जात आहे.</p>
+    <a id="returnBtn" class="btn" style="display:none;" href="intent://payment-complete#Intent;scheme=aplarecharge;package=com.aplarecharge.aplarecharge;end">📲 AplaRecharge ॲपमध्ये परत जा</a>
   </div>
   <script>
     window.onload = function () {
@@ -45,11 +57,21 @@
       const orderId = params.get('order_id') || '';
 
       if (done === '1') {
-        document.getElementById('statusIcon').textContent = '✅';
-        document.getElementById('statusTitle').textContent = 'पेमेंट प्रक्रिया पूर्ण झाली!';
-        document.getElementById('statusDesc').textContent = 'तुमचे पेमेंट व्हेरिफाय केले जात आहे. कृपया AplaRecharge ॲप उघडा (Order: ' + orderId + ')';
+        document.getElementById('statusIcon').textContent = '🎉';
+        document.getElementById('statusTitle').textContent = 'अभिनंदन! पेमेंट प्रक्रिया पूर्ण झाली!';
+        document.getElementById('statusDesc').textContent = 'तुमचे AplaRecharge ॲप आपोआप उघडत आहे...';
+        const btn = document.getElementById('returnBtn');
+        const deepLink = 'intent://payment-complete?order_id=' + encodeURIComponent(orderId) + '#Intent;scheme=aplarecharge;package=com.aplarecharge.aplarecharge;end';
+        btn.href = deepLink;
+        btn.style.display = 'inline-block';
+
         if (orderId) {
-          fetch('https://aplarecharge-server.onrender.com/api/payment/cashfree-return?order_id=' + encodeURIComponent(orderId)).catch(function(){});
+          fetch('https://aplarecharge-server.onrender.com/api/payment/cashfree-return?order_id=' + encodeURIComponent(orderId))
+            .finally(function () {
+              window.location.href = deepLink;
+            });
+        } else {
+          window.location.href = deepLink;
         }
         return;
       }
